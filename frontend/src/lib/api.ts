@@ -1,7 +1,7 @@
 export const BASE =
   (import.meta as any).env?.VITE_API_URL ||
   (import.meta as any).env?.VITE_API_BASE ||
-  "http://localhost:3000";
+  "http://localhost:8000";
 
 /**
  * Thin fetch wrapper — native fetch with JSON handling.

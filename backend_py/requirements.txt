@@ -1,9 +1,9 @@
 # Core — FastAPI replacement for NestJS 9 (backend/src/app.module.ts)
 fastapi==0.110.0
 uvicorn[standard]==0.27.1
-pydantic==2.6.1
+pydantic==2.11.7
 pydantic-settings==2.1.0
-sqlmodel==0.0.16
+sqlmodel==0.0.22
 sqlalchemy==2.0.27
 pymysql==1.1.0
 alembic==1.13.1

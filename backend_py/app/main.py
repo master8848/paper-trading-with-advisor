@@ -12,6 +12,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database import DATABASE_URL, create_db_and_tables
 from app.routers import portfolios, positions, stock_exchange, stocks, trades
 
 # Quant module — Qlib + execution realism (Microsoft Qlib integration)
@@ -29,9 +30,20 @@ app = FastAPI(
         "Python FastAPI replacement for NestJS 9 backend. "
         "Keeps MySQL finance_app (localhost:3306) and frontend compatibility "
         "GET /stocks?duration=... and GET /stock-exchange/Nse. "
-        "New domain: portfolios / positions / trades / price_snapshots."
+        "New domain: portfolios / positions / trades / price_snapshots. "
+        "Set DATABASE_URL=sqlite:///./finance_app.db for dev without MySQL."
     ),
 )
+
+
+@app.on_event("startup")
+def _create_tables_if_sqlite() -> None:
+    # Auto-create tables for SQLite dev fallback so GET /stocks returns [] not 500
+    if DATABASE_URL.startswith("sqlite"):
+        try:
+            create_db_and_tables()
+        except Exception:
+            pass
 
 # CORS enabled — mirrors NestJS enableCors()
 app.add_middleware(

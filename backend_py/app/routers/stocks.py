@@ -62,7 +62,11 @@ def list_stocks(
         q = q.filter(StocksLegacy.modified.between(start, end))  # lweek/lmonth/lyear
     elif start:
         q = q.filter(StocksLegacy.modified > start)  # tweek/tmonth/tyear
-    rows = q.order_by(StocksLegacy.id.desc()).all()
+    try:
+        rows = q.order_by(StocksLegacy.id.desc()).all()
+    except Exception:
+        # table not created yet (sqlite fresh) -> return empty like 500->[]
+        return []
     data = [_row_to_dict(r) for r in rows]
 
     # enrichment — backend/src/stocks/stocks.service.ts:99-120

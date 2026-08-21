@@ -71,6 +71,12 @@ venv/
 backend_py/.venv/
 backend_py/__pycache__/
 
+# Env — keep .env.example, ignore local .env
+.env
+!.env.example
+frontend/.env
+frontend/.env.local
+
 # Generated OpenAPI (regen via gen:api)
 frontend/src/api/generated/
 frontend/openapi.json

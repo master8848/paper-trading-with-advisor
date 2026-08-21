@@ -165,7 +165,6 @@ export default function StockView() {
                 src={tradingViewSrc}
                 className="w-full h-full border-0"
                 loading="lazy"
-                allowTransparency
               />
               <div className="pointer-events-none absolute inset-0 border-t" />
             </div>

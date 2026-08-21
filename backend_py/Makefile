@@ -1,7 +1,7 @@
 .PHONY: openapi dev install test lint
 
-# Default port matches AppModule / frontend Home.tsx:19 (http://localhost:3000)
-PORT ?= 3000
+# Default port 8000 avoids clash with paraphras on :3000; frontend VITE_API_URL defaults to 8000
+PORT ?= 8000
 
 install:
 	pip install -r requirements.txt
