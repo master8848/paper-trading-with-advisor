@@ -1,8 +1,14 @@
+/**
+ * @deprecated Legacy react-table v7 implementation — kept for backwards compat.
+ * Prefer `src/components/PaperTradeTable.tsx` which uses TanStack Table v9
+ * (`@tanstack/react-table@^9`) with `createColumnHelper<typeof features, TData>`,
+ * `useTable` + `tableFeatures` and `flexRender`/`table.FlexRender`. This file
+ * will be removed in a future release.
+ */
 import React, { useEffect, useState } from "react";
-import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
-import { MdOutlineEdit } from "react-icons/md";
-import { RiDeleteBin5Fill } from "react-icons/ri";
+import { IconArrowLeft, IconArrowRight, IconEdit, IconTrash, IconEye } from "@tabler/icons-react";
 import moment from "moment";
+import { Link } from "react-router-dom";
 import {
   useTable,
   usePagination,
@@ -13,8 +19,8 @@ import {
 } from "react-table";
 import AddEditStock from "./Form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { useAppSelector } from "./store/app";
+import { api } from "./lib/api";
 const possibleColumns = [
   "lastTradedPrice",
   "fiftyTwoWeekLow",
@@ -34,13 +40,16 @@ export default function Table({ data, queryKey, setMessage, longLoadedBool }) {
   const { longLoaded, shortLoaded } = useAppSelector((c) => c.configureTable);
 
   const mutation = useMutation({
-    mutationFn: (id) => axios.delete("http://localhost:3000/stocks/" + id),
-    onSuccess(data, id, context) {
+    mutationFn: (id: any) => api(`/stocks/${id}`, { method: "DELETE" }),
+    onSuccess(_data, id, _context) {
       queryClient.setQueryData(queryKey, (oldData: any) => {
-        if (oldData) {
+        if (Array.isArray(oldData)) {
+          return oldData.filter((d: any) => d.id != id);
+        }
+        if (oldData?.data) {
           return {
             ...oldData,
-            data: oldData?.data?.filter((data) => data.id != id),
+            data: oldData.data.filter((d: any) => d.id != id),
           };
         }
         return oldData;
@@ -108,23 +117,33 @@ export default function Table({ data, queryKey, setMessage, longLoadedBool }) {
             row: { values },
           },
         }) => (
-          <div className="flex justify-center gap-5 w-10">
+          <div className="flex justify-center gap-2 w-24 items-center">
+            <Link
+              to={`/stock/${values.stockName}`}
+              onClick={(e) => e.stopPropagation()}
+              className="p-1 hover:bg-muted rounded"
+              aria-label={`View ${values.stockName}`}
+            >
+              <IconEye size={18} className="text-primary" />
+            </Link>
             <button
               onClick={() => {
                 setEditPannel(values);
               }}
+              aria-label="Edit"
+              className="p-1 hover:bg-muted rounded"
             >
-              <MdOutlineEdit fill="blue" size={20} />
+              <IconEdit size={18} className="text-blue-600" />
             </button>
             <button
               onClick={() => {
                 console.log(values);
-                // setEditPannel(values);
                 mutation.mutate(values?.id);
               }}
-              className="ml-5"
+              className="p-1 hover:bg-muted rounded"
+              aria-label="Delete"
             >
-              <RiDeleteBin5Fill fill="red" size={18} />
+              <IconTrash size={16} className="text-red-600" />
             </button>
           </div>
         ),
@@ -287,7 +306,7 @@ export default function Table({ data, queryKey, setMessage, longLoadedBool }) {
             }}
             className="border-t-2 border-transparent pt-4 pr-1 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
           >
-            <AiOutlineArrowLeft className="mr-2" />
+            <IconArrowLeft size={16} className="mr-2" />
             Previous
           </button>
         </div>
@@ -320,7 +339,7 @@ export default function Table({ data, queryKey, setMessage, longLoadedBool }) {
             className="border-t-2 border-transparent pt-4 pl-1 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
           >
             Next
-            <AiOutlineArrowRight className="ml-2" />
+            <IconArrowRight size={16} className="ml-2" />
           </button>
         </div>
       </nav>

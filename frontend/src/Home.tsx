@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { BsGear } from "react-icons/bs";
-import axios from "axios";
+import { IconSettings } from "@tabler/icons-react";
 import React, { useState } from "react";
 import Loader from "./Loader";
 import Table from "./Table";
 import TableConFigure from "./TableConfigurations";
+import { api, qs } from "./lib/api";
 type Tduration = "tweek" | "lWeek" | "tyear" | "lyear" | "tmonth" | "lmonth";
 
 export default function Home() {
@@ -15,10 +15,8 @@ export default function Home() {
 
   const { data, isLoading } = useQuery({
     queryFn: () =>
-      axios.get(
-        "http://localhost:3000/stocks?duration=" +
-          Duration +
-          (AllDatas ? "&load=true" : "")
+      api<any[]>(
+        `/stocks${qs({ duration: Duration, ...(AllDatas ? { load: "true" } : {}) })}`
       ),
     queryKey: ["Stocks", Duration, AllDatas],
     cacheTime: Infinity,
@@ -30,7 +28,7 @@ export default function Home() {
     refetchOnWindowFocus: false,
   });
   const {} = useQuery({
-    queryFn: () => axios.get("http://localhost:3000/stock-exchange/Nse"),
+    queryFn: () => api<string[]>("/stock-exchange/Nse"),
     queryKey: ["NseStockName"],
     cacheTime: Infinity,
     refetchOnWindowFocus: false,
@@ -84,13 +82,13 @@ export default function Home() {
                 </option>
               ))}
             </select>
-            <button className="ml-3" onClick={() => setOpenOptions(true)}>
-              <BsGear size={30} />
+            <button className="ml-3" onClick={() => setOpenOptions(true)} aria-label="Settings">
+              <IconSettings size={30} />
             </button>
           </div>
         </div>
         <Table
-          data={data?.data || []}
+          data={data || []}
           queryKey={["Stocks", Duration, AllDatas]}
           setMessage={setMessage}
           longLoadedBool={AllDatas}

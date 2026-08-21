@@ -2,9 +2,9 @@ import React, { Fragment, useEffect, useState } from "react";
 import Select from "react-select";
 import { Dialog, Switch, Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "./lib/api";
 // import { NseIndia } from "stock-nse-india";
 // import Creatable from "react-select/creatable";
 import CreatableSelect from "react-select/creatable";
@@ -87,25 +87,25 @@ function FormSmall({
 }) {
   const [Symbole, setSymbole] = useState("");
   const { data: optionsNse, isLoading } = useQuery({
-    queryFn: () => axios.get("http://localhost:3000/stock-exchange/Nse"),
+    queryFn: () => api<string[]>("/stock-exchange/Nse"),
     queryKey: ["NseStockName"],
     cacheTime: Infinity,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    select: (d) => d.data?.map((c) => ({ value: c, label: c })) || [],
+    select: (d) => d?.map((c) => ({ value: c, label: c })) || [],
   });
 
   const { register, reset, handleSubmit } = useForm({
     defaultValues,
   });
   const { data: Prices } = useQuery({
-    queryFn: () => axios.get("http://localhost:3000/stock-exchange/" + Symbole),
+    queryFn: () => api<any>("/stock-exchange/" + Symbole),
     queryKey: ["NSE_LasT_TradedPrice", Symbole],
     cacheTime: Infinity,
     refetchOnMount: false,
     enabled: !!Symbole,
     refetchOnWindowFocus: false,
-    select: (d) => d?.data || {},
+    select: (d) => d || {},
   });
   useEffect(() => {
     reset({ price: Prices?.lastTradedPrice });
@@ -113,35 +113,38 @@ function FormSmall({
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: ({ id, data }: any) =>
-      edit
-        ? axios.patch("http://localhost:3000/stocks/" + id, {
-            ...data,
-            stockName: Symbole,
-            username: "MBSKS",
-          })
-        : axios.post("http://localhost:3000/stocks", {
-            ...data,
-            stockName: Symbole,
-            username: "MBSKS",
-          }),
+    mutationFn: ({ id, data }: any) => {
+      const body = JSON.stringify({
+        ...data,
+        stockName: Symbole,
+        username: "MBSKS",
+      });
+      return edit
+        ? api<any>(`/stocks/${id}`, { method: "PATCH", body })
+        : api<any>("/stocks", { method: "POST", body });
+    },
     onError(error) {
       toast.error(
         "Error while " + (edit ? "editing" : "adding") + " your stock"
       );
       console.error(error);
     },
-    onSuccess(data, id, context) {
+    onSuccess(data: any, vars: any) {
       queryClient.setQueryData(queryKey, (oldData: any) => {
         toast.success(
           "Item was " + (edit ? "edited" : "added") + " successfully"
         );
-        if (oldData) {
+        if (Array.isArray(oldData)) {
+          return edit
+            ? [...oldData.filter((d: any) => d.id != vars.id), data]
+            : [...oldData, data];
+        }
+        if (oldData?.data) {
           return {
             ...oldData,
             data: edit
-              ? [...oldData?.data?.filter((data) => data.id != id), data.data]
-              : [...oldData?.data, data.data],
+              ? [...oldData.data.filter((d: any) => d.id != vars.id), data]
+              : [...oldData.data, data],
           };
         }
         return oldData;
