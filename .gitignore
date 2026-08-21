@@ -81,3 +81,9 @@ frontend/.env.local
 frontend/src/api/generated/
 frontend/openapi.json
 backend_py/openapi.json
+
+# SQLite / libsql
+*.db
+*.sqlite
+*.sqlite3
+finance_app.db
