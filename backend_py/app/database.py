@@ -1,39 +1,44 @@
-"""Database engine + session for finance_app MySQL (mirrors backend/src/app.module.ts:11)."""
+"""Database engine — SQLite by default (libsql-compatible), swappable to Postgres/MySQL via DATABASE_URL.
+
+Default: sqlite:///./finance_app.db (no creds, no server). Set DATABASE_URL to use Postgres:
+  DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/finance_app
+  DATABASE_URL=libsql://user:pass@host/db  (Turso)
+  DATABASE_URL=mysql+pymysql://user:pass@localhost:3306/finance_app?charset=utf8mb4
+
+Legacy MySQL hardcoded creds removed — was leaking password in git history.
+"""
 
 from __future__ import annotations
 
 import os
-import urllib.parse
 from typing import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlmodel import SQLModel
 
-# Hardcoded config from backend/src/app.module.ts:11-17 — overridable via DATABASE_URL env
-DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_PORT = int(os.environ.get("DB_PORT", "3306"))
-DB_USER = os.environ.get("DB_USER", "Finance")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "***REDACTED***")
-DB_NAME = os.environ.get("DB_NAME", "finance_app")
+# Default is SQLite (libsql-compatible) — file in repo root, no server required.
+# Swappable to Postgres/libsql/MySQL by setting DATABASE_URL env.
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./finance_app.db")
 
-# Password contains '@' -> must be URL-encoded
-_DB_PASS_ENCODED = urllib.parse.quote_plus(DB_PASSWORD)
+# Also support legacy DB_* envs for MySQL compat (no hardcoded password)
+if DATABASE_URL == "sqlite:///./finance_app.db" and os.environ.get("DB_PASSWORD"):
+    import urllib.parse
 
-_DEFAULT_MYSQL_URL = (
-    f"mysql+pymysql://{DB_USER}:{_DB_PASS_ENCODED}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    "?charset=utf8mb4"
-)
+    _host = os.environ.get("DB_HOST", "localhost")
+    _port = os.environ.get("DB_PORT", "3306")
+    _user = os.environ.get("DB_USER", "Finance")
+    _pass = urllib.parse.quote_plus(os.environ["DB_PASSWORD"])
+    _name = os.environ.get("DB_NAME", "finance_app")
+    _type = os.environ.get("DB_TYPE", "mysql")
+    if _type == "mysql":
+        DATABASE_URL = f"mysql+pymysql://{_user}:{_pass}@{_host}:{_port}/{_name}?charset=utf8mb4"
+    elif _type == "postgres":
+        DATABASE_URL = f"postgresql+psycopg://{_user}:{_pass}@{_host}:{_port}/{_name}"
 
-# Allow full override: DATABASE_URL=sqlite:///./finance_app.db for dev without MySQL
-# QA found MySQL not running on CI/laptop hangs frontend on Loading... — fallback to SQLite
-DATABASE_URL = os.environ.get("DATABASE_URL", _DEFAULT_MYSQL_URL)
+_is_sqlite = DATABASE_URL.startswith("sqlite") or DATABASE_URL.startswith("libsql")
 
-# SQLite fallback for dev when MySQL not available (set DATABASE_URL=sqlite:///./finance_app.db)
-_is_sqlite = DATABASE_URL.startswith("sqlite")
-
-# pymysql driver; pool_pre_ping handles MySQL idle disconnects; timeout fails fast (was hanging 30s)
-_connect_args = {"connect_timeout": 5} if not _is_sqlite else {"check_same_thread": False}
+_connect_args = {"check_same_thread": False} if _is_sqlite else {"connect_timeout": 5}
 
 engine = create_engine(
     DATABASE_URL,

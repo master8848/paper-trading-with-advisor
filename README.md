@@ -43,7 +43,7 @@ React (Vite :5173) ──fetch──► FastAPI :8000 ──► Qlib Service (Al
   │  src/lib/api.ts              │  app/main.py        │  app/quant/qlib_service.py
   │  @tanstack/query             │  app/routers/*      │  provider_uri=./qlib_data
   │  @tanstack/table  @tanstack/form                ▼
-  │                                   MySQL finance_app :3306
+  │                                   SQLite finance_app.db (libsql) — swappable to Postgres
   │                                   portfolios / positions / trades / price_snapshots
   │                                   + legacy Stocks (compat)
   └─ HeyAPI codegen ◄── /openapi.json ─┘
@@ -61,14 +61,14 @@ React (Vite :5173) ──fetch──► FastAPI :8000 ──► Qlib Service (Al
 |-------|-------|
 | API | FastAPI 0.110 + SQLModel 0.0.16 (SQLAlchemy 2.0) + Alembic 1.13 + pydantic v2 |
 | Quant | pyqlib 0.9.6 + lightgbm 4.3.0 + pandas 2.1 + numpy 1.26 · `yahooquery` / `nsepython` / `yfinance` for NSE data |
-| DB | MySQL `finance_app` on `localhost:3306` (`pymysql`) |
+| DB | SQLite `finance_app.db` (libsql-compatible, swappable to Postgres via DATABASE_URL) |
 | Frontend | Vite 4 + React 18 + Tailwind 3 + shadcn / Base UI + `@tabler/icons-react` |
 | Frontend data | `@tanstack/react-table` 8 (v9 API in `PaperTradeTable.tsx`), `@tanstack/react-form` 1.x, `@tanstack/react-query` 4, `fetch` only (no axios) |
 | Codegen | `@hey-api/openapi-ts` from `http://localhost:8000/openapi.json` → `src/api/generated` |
 
 ## Setup
 
-Prereqs: Python 3.12+, Node 18+, MySQL running with DB `finance_app` created.
+Prereqs: Python 3.12+, Node 18+, SQLite (no server) — DB file `finance_app.db` created on first run. For Postgres: set DATABASE_URL=postgresql+psycopg://...
 
 ### Backend (`backend_py`)
 
@@ -92,7 +92,7 @@ uvicorn app.main:app --reload --port 8000
 # health at http://localhost:8000/health
 ```
 
-DB credentials are hardcoded to match `backend/src/app.module.ts` — `Finance / ***REDACTED*** / finance_app` on `localhost:3306` (`app/database.py`, `alembic.ini`). No `.env` required.
+DB is SQLite `finance_app.db` by default (libsql-compatible). Swappable to Postgres/MySQL via DATABASE_URL env (see backend_py/app/database.py, alembic.ini). No creds required.
 
 Optional tooling:
 
@@ -135,8 +135,8 @@ VITE_API_URL=http://localhost:8000
 
 ## Migration from NestJS
 
-- `backend/` (NestJS 9 + TypeORM) is **legacy**. `backend_py/` is the replacement and keeps the same MySQL DB and frontend contract (`GET /stocks`, `GET /stock-exchange/Nse`).
-- `backend/src/app.module.ts:11-22` DB config is preserved verbatim in `backend_py/app/database.py` and `backend_py/alembic.ini`.
+- `backend/` (NestJS 9 + TypeORM) is **legacy**. `backend_py/` is the replacement and keeps the same frontend contract (DB now SQLite by default; was MySQL) (`GET /stocks`, `GET /stock-exchange/Nse`).
+- `backend/src/app.module.ts:11-22` DB config is now env-driven SQLite (was MySQL hardcoded) — see `backend_py/app/database.py` and `backend_py/alembic.ini`.
 - `migrationsRun: true` in NestJS → `alembic upgrade head` in FastAPI. `002_migrate_stocks_to_portfolios.py` copies legacy `Stocks` rows into new tables idempotently; the `Stocks` table is retained.
 - Delete `backend/` after parity is verified (all frontend routes working against `:8000` and no regressions in `?load=true` enrichment / duration filters).
 

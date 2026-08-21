@@ -1,6 +1,6 @@
 # backend_py — FastAPI
 
-FastAPI replacement for `backend/` (NestJS 9 + TypeORM). Same MySQL `finance_app` on `localhost:3306`, same frontend contract, plus portfolio/positions/trades and Qlib quant.
+FastAPI replacement for `backend/` (NestJS 9 + TypeORM). SQLite `finance_app.db` by default (libsql-compatible, swappable to Postgres), same frontend contract, plus portfolio/positions/trades and Qlib quant.
 
 ## Setup
 
@@ -19,7 +19,7 @@ alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
 
-MySQL must be running and `finance_app` must exist before `alembic upgrade head`. Credentials are hardcoded in `app/database.py:13` and `alembic.ini:8` to match `backend/src/app.module.ts:11` (`Finance / ***REDACTED***`). No `.env` loading. `python -m py_compile` is sufficient for syntax checks without a DB.
+SQLite needs no server — `alembic upgrade head` creates `finance_app.db`. For Postgres/MySQL set DATABASE_URL env (no hardcoded creds). `python -m py_compile` is sufficient for syntax checks without a DB.
 
 ### Tooling
 

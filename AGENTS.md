@@ -6,26 +6,28 @@ Two independent apps — **no** root `package.json` / workspaces. Run commands p
 - `frontend/` — Vite 4 + React 18 + Tailwind 3 + React Router 6 + Redux Toolkit + TanStack Query 4 + `react-table` 7 + Axios. Entry `src/main.tsx` → `src/routes.tsx` → `src/Home.tsx` → `src/Table.tsx` / `src/Form.tsx`.
 
 ## Setup & Run
-No env files; config is hardcoded. Needs local MySQL.
+No env files historically; now SQLite by default (libsql-compatible), swappable to Postgres/MySQL via `DATABASE_URL`.
 ```bash
-# Backend (port 3000, CORS enabled, global ValidationPipe)
-cd backend && npm install
-# Requires MySQL running: host localhost:3306, user Finance, pass ***REDACTED***, db finance_app (see src/app.module.ts:11-22)
-npm run start:dev   # watch mode (nest start --watch)
-npm run start:debug # --debug --watch
-npm run build       # nest build -> dist/
-npm run start:prod  # node dist/main (run after build)
+# Backend_py (FastAPI :8000, SQLite finance_app.db by default — no MySQL needed)
+cd backend_py && uv sync  # or pip install -r requirements.txt
+# Optional: DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/finance_app  # Postgres
+# Optional: DATABASE_URL=mysql+pymysql://user:pass@localhost:3306/finance_app?charset=utf8mb4  # MySQL
+# Optional: DATABASE_URL=libsql://...  # Turso
+DATABASE_URL=sqlite:///./finance_app.db alembic upgrade head
+DATABASE_URL=sqlite:///./finance_app.db uvicorn app.main:app --reload --port 8000
+# Legacy NestJS backend/ (deprecated, now env-driven, defaults to sqlite; was MySQL)
+cd backend && npm install && npm run start:dev
 
-# Frontend (hardcoded backend URL http://localhost:3000 in Home.tsx:19, Table.tsx:37, Form.tsx)
+# Frontend (VITE_API_URL env, defaults to http://localhost:8000)
 cd frontend && npm install
 npm run dev     # vite dev server (default 5173)
 npm run build   # vite build -> dist/
 npm run preview # vite preview
 ```
-Run both concurrently for full stack. Frontend will fail silently if backend not on `:3000`.
+Run both concurrently for full stack. Frontend will fail silently if backend not on `:8000`.
 
 ## Backend Quirks
-- **DB config is hardcoded** in `src/app.module.ts` — no `.env` loading. `migrationsRun: true`, `synchronize` commented out. Only `Stocks` entity is registered; `StockExchangeModule` is stateless.
+- **DB config is env-driven** `DATABASE_URL` (default `sqlite:///./finance_app.db`, libsql-compatible; swappable to `postgresql+psycopg://...` or `mysql+pymysql://...`). Legacy `backend/src/app.module.ts` was hardcoded MySQL, now env-driven. `migrationsRun: true`, `synchronize` commented out. Only `Stocks` entity is registered; `StockExchangeModule` is stateless.
 - **TypeORM + moment**: `StocksService.findAll()` (`src/stocks/stocks.service.ts:29`) filters by `modified` using `MoreThan`/`Between` with `moment().startOf(...)` and `toISOString()`. Duration param: `tweek|lweek|tmonth|lmonth|tyear|lyear` (default = all). `?load=true` enriches each row via `stock-nse-india` call — slow, makes N parallel HTTP requests.
 - **Validation**: `main.ts:8` uses `new ValidationPipe()` without `whitelist/transform` flags. DTOs (`stocks/dto/*.ts`) use `class-validator`.
 - **Caching**: `StockExchangeController.getStockExchange()` (`src/stock-exchange/stock-exchange.controller.ts:18`) uses `CacheInterceptor` for `GET /stock-exchange/Nse`.
