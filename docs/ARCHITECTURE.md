@@ -15,7 +15,7 @@ FastAPI :8000  app/main.py
                     │           └─ mcap / ADV / impact flags
                     └─ Alpha158 → DatasetH → LGBModel  (or fallback hash+momentum)
                          ▲
-                         │  provider_uri = backend_py/qlib_data
+                         │  provider_uri = backend/qlib_data
                          │  (calendars/day.txt, csv/day/*.csv, models/*.pkl)
 ```
 
@@ -26,7 +26,7 @@ FastAPI :8000  app/main.py
 
 ## DB Schema
 
-SQLite/libSQL `finance_app.db` (Turso libSQL; swappable to Postgres via DATABASE_URL). Managed by Alembic (`backend_py/alembic/`). `Stocks` table is retained for compat.
+SQLite/libSQL `finance_app.db` (Turso libSQL; swappable to Postgres via DATABASE_URL). Managed by Alembic (`backend/alembic/`). `Stocks` table is retained for compat.
 
 ```sql
 -- legacy (TypeORM Stocks entity) — kept verbatim
@@ -92,14 +92,14 @@ Migrations:
 - `001_initial_portfolios_positions_trades.py` — creates new tables.
 - `002_migrate_stocks_to_portfolios.py` — copies `Stocks` rows into `portfolios`/`positions` idempotently; does not drop `Stocks`.
 
-See `backend_py/app/models.py` for SQLModel definitions and `backend_py/app/schemas.py` for pydantic schemas.
+See `backend/app/models.py` for SQLModel definitions and `backend/app/schemas.py` for pydantic schemas.
 
 ## Qlib Pipeline
 
-`backend_py/app/quant/qlib_service.py` — lazy, import-deferred.
+`backend/app/quant/qlib_service.py` — lazy, import-deferred.
 
 ```
-provider_uri (backend_py/qlib_data)
+provider_uri (backend/qlib_data)
   ├─ calendars/day.txt        # trading days, seeded with last 30 if missing
   ├─ csv/day/<SYMBOL>.csv     # OHLCV from NSEDataCollector (datetime,open,high,low,close,volume,factor)
   └─ models/lgb_alpha158.pkl  # optional pretrained LGBModel
@@ -139,7 +139,7 @@ If `pyqlib` is not installed, `_check_qlib_available()` returns false and all qu
 
 ## Liquidity Gate
 
-`backend_py/app/quant/screener.py` + `app/quant/execution.py`. Heavy inference only runs if the symbol passes.
+`backend/app/quant/screener.py` + `app/quant/execution.py`. Heavy inference only runs if the symbol passes.
 
 | Check | Threshold | Flag | Severity |
 |-------|-----------|------|----------|
@@ -163,11 +163,11 @@ pnl_normalized = (pnl / baseline_value) * 100          # when normalized=true
 norm_price     = 100 * (price / baseline_price)        # per-position normalized price (display)
 ```
 
-Computed in `GET /portfolios/{id}/performance?normalized=true` (`backend_py/app/routers/portfolios.py:72`). `current_price` is fetched live via `find_last_traded_price(symbol)` per position; if LTP is unavailable `current_price` and `pnl` are `null`. `POST /portfolios/{id}/baseline?baseline_value=&baseline_price=` updates the portfolio baseline and backfills `baseline_price` for positions where it is null.
+Computed in `GET /portfolios/{id}/performance?normalized=true` (`backend/app/routers/portfolios.py:72`). `current_price` is fetched live via `find_last_traded_price(symbol)` per position; if LTP is unavailable `current_price` and `pnl` are `null`. `POST /portfolios/{id}/baseline?baseline_value=&baseline_price=` updates the portfolio baseline and backfills `baseline_price` for positions where it is null.
 
 ## Execution Realism
 
-`backend_py/app/quant/execution.py:225` — `POST /quant/execution/simulate`.
+`backend/app/quant/execution.py:225` — `POST /quant/execution/simulate`.
 
 ```
 avgVolume_20D, last_close, volatility_20D from 20D history

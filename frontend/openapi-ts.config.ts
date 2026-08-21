@@ -4,8 +4,8 @@ import { defineConfig } from '@hey-api/openapi-ts';
  * Hey API OpenAPI-TS config — JS-native generator (no Java).
  * Input is the FastAPI spec served at runtime.
  * Backend runs on :8000 (FastAPI) or :3000 fallback (legacy NestJS compat).
- * See backend_py/app/main.py:23 FastAPI(title="NSE Finance API", version="0.1.0", openapi_url="/openapi.json", docs_url="/docs")
- * and backend_py/scripts/export_openapi.py for offline export.
+ * See backend/app/main.py:23 FastAPI(title="NSE Finance API", version="0.1.0", openapi_url="/openapi.json", docs_url="/docs")
+ * and backend/scripts/export_openapi.py for offline export.
  */
 export default defineConfig({
   // primary — live backend (requires `uvicorn app.main:app --port 8000` running)

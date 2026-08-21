@@ -9,7 +9,7 @@ Original TS:
 Python port:
   - Primary: yfinance (reliable, no NSE cookie handshake)
   - Fallback: nsepython (if installed)
-  - Reuses backend_py/app/quant/data_collector.py when available
+  - Reuses backend/app/quant/data_collector.py when available
   - TTL cache for stock list (mirrors NestJS CacheInterceptor on GET /stock-exchange/Nse)
 
 Reference kept: backend/src/stock-exchange/stock-exchange.service.ts:15

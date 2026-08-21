@@ -28,7 +28,7 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-# Default provider location (relative to backend_py)
+# Default provider location (relative to backend)
 DEFAULT_PROVIDER_URI = pathlib.Path(__file__).resolve().parents[2] / "qlib_data"
 
 # Liquidity thresholds before allowing inference (avoid wasting compute on illiquid micro-caps)

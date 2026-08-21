@@ -19,7 +19,7 @@ Pick any NSE stock, say you bought 100 shares at today's price (paper trade — 
 
 # NSE Finance — Paper Trading + Qlib Prediction
 
-Paper trading for NSE equities with realistic execution, Qlib-powered predictions, and baseline-normalized performance. Migrated from NestJS 9 (`backend/`) to FastAPI + SQLModel (`backend_py/`).
+Paper trading for NSE equities with realistic execution, Qlib-powered predictions, and baseline-normalized performance. FastAPI + SQLModel (`backend/`).
 
 ## Overview
 
@@ -70,10 +70,10 @@ React (Vite :5173) ──fetch──► FastAPI :8000 ──► Qlib Service (Al
 
 Prereqs: Python 3.12+, Node 18+, SQLite/libSQL (no server) — DB file `finance_app.db` created on first run (libSQL-compatible, Turso). For Postgres: `DATABASE_URL=postgresql+psycopg://...` For self-hosted Turso: `DATABASE_URL=sqlite+libsql://127.0.0.1:8080/finance_app.db` (see `docker-compose.libsql.yml`).
 
-### Backend (`backend_py`)
+### Backend (`backend`)
 
 ```bash
-cd backend_py
+cd backend
 
 # install (prefer uv; pip fallback)
 uv sync
@@ -92,12 +92,12 @@ uvicorn app.main:app --reload --port 8000
 # health at http://localhost:8000/health
 ```
 
-DB is SQLite/libSQL `finance_app.db` by default (libsql-compatible). Swappable to Postgres/MySQL via DATABASE_URL env (see backend_py/app/database.py, alembic.ini). No creds required.
+DB is SQLite/libSQL `finance_app.db` by default (libsql-compatible). Swappable to Postgres/MySQL via DATABASE_URL env (see backend/app/database.py, alembic.ini). No creds required.
 
 Optional tooling:
 
 ```bash
-cd backend_py
+cd backend
 ruff check . && ruff format .
 ty check
 pytest -q
@@ -135,14 +135,14 @@ VITE_API_URL=http://localhost:8000
 
 ## Migration from NestJS
 
-- `backend/` (NestJS 9 + TypeORM) is **legacy**. `backend_py/` is the replacement and keeps the same frontend contract (DB now SQLite by default; was MySQL) (`GET /stocks`, `GET /stock-exchange/Nse`).
-- `backend/src/app.module.ts:11-22` DB config is now env-driven SQLite (was MySQL hardcoded) — see `backend_py/app/database.py` and `backend_py/alembic.ini`.
+- `backend/` (NestJS 9 + TypeORM) is **legacy**. `backend/` is the replacement and keeps the same frontend contract (DB now SQLite by default; was MySQL) (`GET /stocks`, `GET /stock-exchange/Nse`).
+- `backend/src/app.module.ts:11-22` DB config is now env-driven SQLite (was MySQL hardcoded) — see `backend/app/database.py` and `backend/alembic.ini`.
 - `migrationsRun: true` in NestJS → `alembic upgrade head` in FastAPI. `002_migrate_stocks_to_portfolios.py` copies legacy `Stocks` rows into new tables idempotently; the `Stocks` table is retained.
 - Delete `backend/` after parity is verified (all frontend routes working against `:8000` and no regressions in `?load=true` enrichment / duration filters).
 
 ## Docs
 
-- [Backend — FastAPI detail](backend_py/README.md)
+- [Backend — FastAPI detail](backend/README.md)
 - [Frontend — Vite/React detail](frontend/README.md)
 - [Architecture — data flow, DB schema, Qlib pipeline](docs/ARCHITECTURE.md)
 - [API — OpenAPI, curl examples, paper trade with execution realism](docs/API.md)
@@ -150,7 +150,7 @@ VITE_API_URL=http://localhost:8000
 ## Verification (no DB)
 
 ```bash
-cd backend_py && python -m py_compile app/main.py app/models.py app/database.py app/nse.py app/utils/duration.py app/routers/*.py app/quant/*.py alembic/env.py
+cd backend && python -m py_compile app/main.py app/models.py app/database.py app/nse.py app/utils/duration.py app/routers/*.py app/quant/*.py alembic/env.py
 cd frontend && npm run build
 ```
 

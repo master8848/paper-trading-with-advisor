@@ -2,7 +2,7 @@
 # Usage:
 #   docker compose -f docker-compose.libsql.yml up -d
 #   DATABASE_URL=sqlite+libsql://127.0.0.1:8080/finance_app.db alembic upgrade head
-#   DATABASE_URL=sqlite+libsql://127.0.0.1:8080/finance_app.db uvicorn app.main:app --reload --port 8000 --app-dir backend_py
+#   DATABASE_URL=sqlite+libsql://127.0.0.1:8080/finance_app.db uvicorn app.main:app --reload --port 8000 --app-dir backend
 # Data persisted in ./data/libsql
 
 services:

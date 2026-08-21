@@ -111,7 +111,7 @@ All are plain `https://` links — no broken/internal routes.
 
 ## HeyAPI Codegen
 
-Spec is served by FastAPI at `http://localhost:8000/openapi.json` (`backend_py/app/main.py:26`).
+Spec is served by FastAPI at `http://localhost:8000/openapi.json` (`backend/app/main.py:26`).
 
 ```bash
 # backend must be running on :8000
@@ -135,7 +135,7 @@ npm run gen:api
 }
 ```
 
-Config lives in `openapi-ts.config.ts` — JS-native, no Java `openapi-generator-cli`. It points to `http://localhost:8000/openapi.json` (fallback `http://localhost:3000/openapi.json` or local `./openapi.json` via `python backend_py/scripts/export_openapi.py --out frontend/openapi.json`), uses `client: 'fetch'` (`@hey-api/client-fetch`) and `exportSchemas: true` (`@hey-api/schemas` + `@hey-api/sdk`), and writes to `src/api/generated`. Thin wrapper `src/api/client.ts` configures `baseUrl` from `VITE_API_URL` (see `.env.example`); `src/lib/api.ts` re-exports the same `fetch` semantics and is compatible via `initGeneratedClient()`.
+Config lives in `openapi-ts.config.ts` — JS-native, no Java `openapi-generator-cli`. It points to `http://localhost:8000/openapi.json` (fallback `http://localhost:3000/openapi.json` or local `./openapi.json` via `python backend/scripts/export_openapi.py --out frontend/openapi.json`), uses `client: 'fetch'` (`@hey-api/client-fetch`) and `exportSchemas: true` (`@hey-api/schemas` + `@hey-api/sdk`), and writes to `src/api/generated`. Thin wrapper `src/api/client.ts` configures `baseUrl` from `VITE_API_URL` (see `.env.example`); `src/lib/api.ts` re-exports the same `fetch` semantics and is compatible via `initGeneratedClient()`.
 
 Docs: https://heyapi.dev/openapi-ts/. The generated client is `fetch`-based (no `axios`). Import from `src/api/generated` and wrap with TanStack Query. Example:
 

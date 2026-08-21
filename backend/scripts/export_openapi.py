@@ -3,7 +3,7 @@
 Export OpenAPI spec to openapi.json
 
 Usage:
-  python scripts/export_openapi.py              # writes ./openapi.json (backend_py root)
+  python scripts/export_openapi.py              # writes ./openapi.json (backend root)
   python scripts/export_openapi.py --out ../frontend/openapi.json  # custom path
   make openapi                                  # via Makefile
 
@@ -17,7 +17,7 @@ import json
 import pathlib
 import sys
 
-# Ensure app/ is importable when run as `python scripts/export_openapi.py` from backend_py/
+# Ensure app/ is importable when run as `python scripts/export_openapi.py` from backend/
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
