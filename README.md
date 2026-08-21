@@ -43,7 +43,7 @@ React (Vite :5173) ──fetch──► FastAPI :8000 ──► Qlib Service (Al
   │  src/lib/api.ts              │  app/main.py        │  app/quant/qlib_service.py
   │  @tanstack/query             │  app/routers/*      │  provider_uri=./qlib_data
   │  @tanstack/table  @tanstack/form                ▼
-  │                                   SQLite finance_app.db (libsql) — swappable to Postgres
+  │                                   SQLite/libSQL finance_app.db (Turso) — swappable to Postgres
   │                                   portfolios / positions / trades / price_snapshots
   │                                   + legacy Stocks (compat)
   └─ HeyAPI codegen ◄── /openapi.json ─┘
@@ -61,14 +61,14 @@ React (Vite :5173) ──fetch──► FastAPI :8000 ──► Qlib Service (Al
 |-------|-------|
 | API | FastAPI 0.110 + SQLModel 0.0.16 (SQLAlchemy 2.0) + Alembic 1.13 + pydantic v2 |
 | Quant | pyqlib 0.9.6 + lightgbm 4.3.0 + pandas 2.1 + numpy 1.26 · `yahooquery` / `nsepython` / `yfinance` for NSE data |
-| DB | SQLite `finance_app.db` (libsql-compatible, swappable to Postgres via DATABASE_URL) |
+| DB | SQLite/libSQL `finance_app.db` (Turso libSQL, swappable to Postgres via DATABASE_URL) |
 | Frontend | Vite 4 + React 18 + Tailwind 3 + shadcn / Base UI + `@tabler/icons-react` |
 | Frontend data | `@tanstack/react-table` 8 (v9 API in `PaperTradeTable.tsx`), `@tanstack/react-form` 1.x, `@tanstack/react-query` 4, `fetch` only (no axios) |
 | Codegen | `@hey-api/openapi-ts` from `http://localhost:8000/openapi.json` → `src/api/generated` |
 
 ## Setup
 
-Prereqs: Python 3.12+, Node 18+, SQLite (no server) — DB file `finance_app.db` created on first run. For Postgres: set DATABASE_URL=postgresql+psycopg://...
+Prereqs: Python 3.12+, Node 18+, SQLite/libSQL (no server) — DB file `finance_app.db` created on first run (libSQL-compatible, Turso). For Postgres: `DATABASE_URL=postgresql+psycopg://...` For self-hosted Turso: `DATABASE_URL=sqlite+libsql://127.0.0.1:8080/finance_app.db` (see `docker-compose.libsql.yml`).
 
 ### Backend (`backend_py`)
 
@@ -92,7 +92,7 @@ uvicorn app.main:app --reload --port 8000
 # health at http://localhost:8000/health
 ```
 
-DB is SQLite `finance_app.db` by default (libsql-compatible). Swappable to Postgres/MySQL via DATABASE_URL env (see backend_py/app/database.py, alembic.ini). No creds required.
+DB is SQLite/libSQL `finance_app.db` by default (libsql-compatible). Swappable to Postgres/MySQL via DATABASE_URL env (see backend_py/app/database.py, alembic.ini). No creds required.
 
 Optional tooling:
 

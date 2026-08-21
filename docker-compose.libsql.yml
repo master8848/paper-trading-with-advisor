@@ -1,0 +1,18 @@
+# Self-hosted libSQL (Turso) — SQLite-compatible, free for our use case
+# Usage:
+#   docker compose -f docker-compose.libsql.yml up -d
+#   DATABASE_URL=sqlite+libsql://127.0.0.1:8080/finance_app.db alembic upgrade head
+#   DATABASE_URL=sqlite+libsql://127.0.0.1:8080/finance_app.db uvicorn app.main:app --reload --port 8000 --app-dir backend_py
+# Data persisted in ./data/libsql
+
+services:
+  sqld:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    container_name: nse-libsql
+    ports:
+      - "8080:8080" # HTTP API for libSQL
+      - "5001:5001" # gRPC
+    volumes:
+      - ./data/libsql:/data
+    command: sqld --http-listen-addr 0.0.0.0:8080 --grpc-listen-addr 0.0.0.0:5001 /data/libsql.db
+    restart: unless-stopped

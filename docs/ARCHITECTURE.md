@@ -8,7 +8,7 @@ User (browser)
   ▼
 FastAPI :8000  app/main.py
   ├─ /stocks, /stock-exchange/*  ──►  app/nse.py  ──► yfinance / yahooquery / nsepython ──► NSE / Yahoo
-  ├─ /portfolios, /positions, /trades  ──►  SQLModel  ──►  SQLite finance_app.db (libsql)
+  ├─ /portfolios, /positions, /trades  ──►  SQLModel  ──►  SQLite/libSQL finance_app.db (Turso)
   └─ /quant/*  ──►  QlibService + Screener + ExecutionSimulator
                     │           │              │
                     │           │              └─ 20D history, spread, circuit, delivery
@@ -26,7 +26,7 @@ FastAPI :8000  app/main.py
 
 ## DB Schema
 
-SQLite `finance_app.db` (libsql-compatible; swappable to Postgres via DATABASE_URL). Managed by Alembic (`backend_py/alembic/`). `Stocks` table is retained for compat.
+SQLite/libSQL `finance_app.db` (Turso libSQL; swappable to Postgres via DATABASE_URL). Managed by Alembic (`backend_py/alembic/`). `Stocks` table is retained for compat.
 
 ```sql
 -- legacy (TypeORM Stocks entity) — kept verbatim

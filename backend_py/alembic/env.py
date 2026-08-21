@@ -24,7 +24,10 @@ if config.config_file_name is not None:
 import os
 
 if os.environ.get("DATABASE_URL"):
-    config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
+    _url = os.environ["DATABASE_URL"]
+    if _url.startswith("libsql://"):
+        _url = _url.replace("libsql://", "sqlite+libsql://", 1)
+    config.set_main_option("sqlalchemy.url", _url)
 
 target_metadata = SQLModel.metadata
 

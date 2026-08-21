@@ -1,6 +1,6 @@
 # backend_py — FastAPI
 
-FastAPI replacement for `backend/` (NestJS 9 + TypeORM). SQLite `finance_app.db` by default (libsql-compatible, swappable to Postgres), same frontend contract, plus portfolio/positions/trades and Qlib quant.
+FastAPI replacement for `backend/` (NestJS 9 + TypeORM). SQLite/libSQL `finance_app.db` by default (libsql-compatible, swappable to Postgres), same frontend contract, plus portfolio/positions/trades and Qlib quant.
 
 ## Setup
 
