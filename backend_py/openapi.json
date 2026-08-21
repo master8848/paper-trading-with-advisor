@@ -1,0 +1,1940 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NSE Finance API",
+    "description": "Python FastAPI replacement for NestJS 9 backend. Keeps MySQL finance_app (localhost:3306) and frontend compatibility GET /stocks?duration=... and GET /stock-exchange/Nse. New domain: portfolios / positions / trades / price_snapshots.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/portfolios": {
+      "get": {
+        "tags": [
+          "portfolios"
+        ],
+        "summary": "List Portfolios",
+        "operationId": "list_portfolios_portfolios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PortfolioRead"
+                  },
+                  "type": "array",
+                  "title": "Response List Portfolios Portfolios Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "portfolios"
+        ],
+        "summary": "Create Portfolio",
+        "operationId": "create_portfolio_portfolios_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/portfolios/{portfolio_id}": {
+      "get": {
+        "tags": [
+          "portfolios"
+        ],
+        "summary": "Get Portfolio",
+        "operationId": "get_portfolio_portfolios__portfolio_id__get",
+        "parameters": [
+          {
+            "name": "portfolio_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Portfolio Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/portfolios/{portfolio_id}/baseline": {
+      "post": {
+        "tags": [
+          "portfolios"
+        ],
+        "summary": "Set Baseline",
+        "operationId": "set_baseline_portfolios__portfolio_id__baseline_post",
+        "parameters": [
+          {
+            "name": "portfolio_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Portfolio Id"
+            }
+          },
+          {
+            "name": "baseline_value",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0.0
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                }
+              ],
+              "description": "New baseline value, e.g. 100",
+              "title": "Baseline Value"
+            },
+            "description": "New baseline value, e.g. 100"
+          },
+          {
+            "name": "baseline_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0.0
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional baseline price for positions",
+              "title": "Baseline Price"
+            },
+            "description": "Optional baseline price for positions"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/portfolios/{portfolio_id}/performance": {
+      "get": {
+        "tags": [
+          "portfolios"
+        ],
+        "summary": "Portfolio Performance",
+        "operationId": "portfolio_performance_portfolios__portfolio_id__performance_get",
+        "parameters": [
+          {
+            "name": "portfolio_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Portfolio Id"
+            }
+          },
+          {
+            "name": "normalized",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, pnl_normalized = pnl / baseline_value * 100",
+              "default": true,
+              "title": "Normalized"
+            },
+            "description": "If true, pnl_normalized = pnl / baseline_value * 100"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PerformancePoint"
+                  },
+                  "title": "Response Portfolio Performance Portfolios  Portfolio Id  Performance Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/positions": {
+      "post": {
+        "tags": [
+          "positions"
+        ],
+        "summary": "Create Position",
+        "operationId": "create_position_positions_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PositionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "positions"
+        ],
+        "summary": "List Positions",
+        "operationId": "list_positions_positions_get",
+        "parameters": [
+          {
+            "name": "portfolio_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Portfolio Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PositionRead"
+                  },
+                  "title": "Response List Positions Positions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/positions/{position_id}": {
+      "get": {
+        "tags": [
+          "positions"
+        ],
+        "summary": "Get Position",
+        "operationId": "get_position_positions__position_id__get",
+        "parameters": [
+          {
+            "name": "position_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Position Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trades": {
+      "post": {
+        "tags": [
+          "trades"
+        ],
+        "summary": "Create Trade",
+        "operationId": "create_trade_trades_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "trades"
+        ],
+        "summary": "List Trades",
+        "operationId": "list_trades_trades_get",
+        "parameters": [
+          {
+            "name": "position_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Position Id"
+            }
+          },
+          {
+            "name": "symbol",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Symbol"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TradeRead"
+                  },
+                  "title": "Response List Trades Trades Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trades/{trade_id}": {
+      "get": {
+        "tags": [
+          "trades"
+        ],
+        "summary": "Get Trade",
+        "operationId": "get_trade_trades__trade_id__get",
+        "parameters": [
+          {
+            "name": "trade_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Trade Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stocks": {
+      "get": {
+        "tags": [
+          "stocks"
+        ],
+        "summary": "List Stocks",
+        "operationId": "list_stocks_stocks_get",
+        "parameters": [
+          {
+            "name": "duration",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "tweek|lweek|tmonth|lmonth|tyear|lyear",
+              "title": "Duration"
+            },
+            "description": "tweek|lweek|tmonth|lmonth|tyear|lyear"
+          },
+          {
+            "name": "load",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "if 'true', enrich each row with LTP/52W",
+              "title": "Load"
+            },
+            "description": "if 'true', enrich each row with LTP/52W"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response List Stocks Stocks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "stocks"
+        ],
+        "summary": "Create stock (legacy compat)",
+        "operationId": "create_stock_stocks_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Create Stock Stocks Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stocks/{stock_id}": {
+      "patch": {
+        "tags": [
+          "stocks"
+        ],
+        "summary": "Update stock",
+        "operationId": "update_stock_stocks__stock_id__patch",
+        "parameters": [
+          {
+            "name": "stock_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Stock Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Update Stock Stocks  Stock Id  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "stocks"
+        ],
+        "summary": "Delete stock",
+        "operationId": "delete_stock_stocks__stock_id__delete",
+        "parameters": [
+          {
+            "name": "stock_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Stock Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Delete Stock Stocks  Stock Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stock-exchange/Nse": {
+      "get": {
+        "tags": [
+          "stock-exchange"
+        ],
+        "summary": "Get Nse Symbols",
+        "description": "Cached list of NSE symbols \u2014 mirrors StockExchangeController.getStockExchange().",
+        "operationId": "get_nse_symbols_stock_exchange_Nse_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response Get Nse Symbols Stock Exchange Nse Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stock-exchange/nse": {
+      "get": {
+        "tags": [
+          "stock-exchange"
+        ],
+        "summary": "Get Nse Symbols Lower",
+        "operationId": "get_nse_symbols_lower_stock_exchange_nse_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response Get Nse Symbols Lower Stock Exchange Nse Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stock-exchange/{symbol}": {
+      "get": {
+        "tags": [
+          "stock-exchange"
+        ],
+        "summary": "Get Last Traded Price",
+        "description": "Mirrors StockExchangeController.getLastTradedPriceOfStock(:id).",
+        "operationId": "get_last_traded_price_stock_exchange__symbol__get",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Symbol"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Last Traded Price Stock Exchange  Symbol  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quant/predict": {
+      "post": {
+        "tags": [
+          "quant"
+        ],
+        "summary": "Qlib prediction",
+        "description": "POST /quant/predict {symbol, horizon}\nReturns score in [-1,1], expected_return, confidence in [0,1].\nHeavy inference is gated behind liquidity check (mcap/volume).",
+        "operationId": "predict_quant_predict_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PredictRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quant/backtest": {
+      "post": {
+        "tags": [
+          "quant"
+        ],
+        "summary": "Qlib backtest",
+        "description": "POST /quant/backtest {symbol, start, end}\nReturns cumulative_return, sharpe, max_drawdown, trades, etc.",
+        "operationId": "backtest_quant_backtest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BacktestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Backtest Quant Backtest Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quant/screen/{symbol}": {
+      "get": {
+        "tags": [
+          "quant"
+        ],
+        "summary": "Liquidity screen (gate for inference)",
+        "description": "GET /quant/screen/{symbol} -> liquidity check.\nOnly run heavy inference if this passes (mcap >=500Cr, vol >=1L).",
+        "operationId": "screen_quant_screen__symbol__get",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Symbol"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Screen Quant Screen  Symbol  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quant/warnings/{symbol}": {
+      "get": {
+        "tags": [
+          "quant"
+        ],
+        "summary": "Screener warnings: mcap, volume, impact",
+        "description": "GET /quant/warnings/{symbol}?qty=1000\nChecks:\n  - mcap < 500Cr\n  - avgVol 20D < 1L (100k)\n  - impactCost > 2%\nReturns flags, warnings, illiquid flag.",
+        "operationId": "warnings_quant_warnings__symbol__get",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Symbol"
+            }
+          },
+          {
+            "name": "qty",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Quantity to estimate impact for",
+              "default": 1000,
+              "title": "Qty"
+            },
+            "description": "Quantity to estimate impact for"
+          },
+          {
+            "name": "ideal_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Ideal price for impact calc",
+              "title": "Ideal Price"
+            },
+            "description": "Ideal price for impact calc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Warnings Quant Warnings  Symbol  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quant/execution/simulate": {
+      "post": {
+        "tags": [
+          "quant"
+        ],
+        "summary": "Realistic execution simulation",
+        "description": "POST /quant/execution/simulate {symbol, qty, ideal_price}\n\nSimulates what you could actually buy/sell:\n  feasible_qty = min(qty, avgVolume*0.1)\n  slippage = 0.1% + 0.5%*(qty/avgVolume)\n  market_impact via sqrt model\nReturns ideal vs realistic prices, feasible_qty, warning, illiquid_flag.",
+        "operationId": "execution_simulate_quant_execution_simulate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecutionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Execution Simulate Quant Execution Simulate Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quant/health": {
+      "get": {
+        "tags": [
+          "quant"
+        ],
+        "summary": "Quant module health",
+        "operationId": "health_quant_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Quant Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BacktestRequest": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol",
+            "examples": [
+              "RELIANCE"
+            ]
+          },
+          "start": {
+            "type": "string",
+            "title": "Start",
+            "description": "YYYY-MM-DD",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "end": {
+            "type": "string",
+            "title": "End",
+            "description": "YYYY-MM-DD",
+            "examples": [
+              "2024-06-01"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "start",
+          "end"
+        ],
+        "title": "BacktestRequest"
+      },
+      "ExecutionRequest": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol",
+            "examples": [
+              "RELIANCE"
+            ]
+          },
+          "qty": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Qty",
+            "description": "Requested quantity",
+            "default": 1000
+          },
+          "ideal_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ideal Price",
+            "description": "Ideal price; if null uses last close"
+          },
+          "side": {
+            "type": "string",
+            "title": "Side",
+            "description": "buy or sell",
+            "default": "buy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol"
+        ],
+        "title": "ExecutionRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PerformancePoint": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "qty": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Qty"
+          },
+          "avg_buy_price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Avg Buy Price"
+          },
+          "current_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Price"
+          },
+          "pnl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pnl"
+          },
+          "pnl_normalized": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pnl Normalized"
+          },
+          "baseline_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Price"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "qty",
+          "avg_buy_price",
+          "current_price",
+          "pnl",
+          "pnl_normalized",
+          "baseline_price"
+        ],
+        "title": "PerformancePoint"
+      },
+      "PortfolioCreate": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "User Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "baseline_value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Baseline Value",
+            "default": "100"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "name"
+        ],
+        "title": "PortfolioCreate"
+      },
+      "PortfolioRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "baseline_value": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Baseline Value"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "name",
+          "baseline_value",
+          "created_at"
+        ],
+        "title": "PortfolioRead"
+      },
+      "PositionCreate": {
+        "properties": {
+          "portfolio_id": {
+            "type": "integer",
+            "title": "Portfolio Id"
+          },
+          "symbol": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Symbol"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Qty"
+          },
+          "avg_buy_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Avg Buy Price"
+          },
+          "baseline_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Price"
+          }
+        },
+        "type": "object",
+        "required": [
+          "portfolio_id",
+          "symbol",
+          "qty",
+          "avg_buy_price"
+        ],
+        "title": "PositionCreate"
+      },
+      "PositionRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "portfolio_id": {
+            "type": "integer",
+            "title": "Portfolio Id"
+          },
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "qty": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Qty"
+          },
+          "avg_buy_price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Avg Buy Price"
+          },
+          "baseline_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Price"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "portfolio_id",
+          "symbol",
+          "qty",
+          "avg_buy_price",
+          "baseline_price",
+          "created_at"
+        ],
+        "title": "PositionRead"
+      },
+      "PredictRequest": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol",
+            "description": "NSE symbol, e.g. RELIANCE or RELIANCE.NS",
+            "examples": [
+              "RELIANCE"
+            ]
+          },
+          "horizon": {
+            "type": "string",
+            "title": "Horizon",
+            "description": "Prediction horizon, e.g. 5d, 10d, 1d",
+            "default": "5d",
+            "examples": [
+              "5d"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol"
+        ],
+        "title": "PredictRequest"
+      },
+      "PredictResponse": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "horizon": {
+            "type": "string",
+            "title": "Horizon"
+          },
+          "horizon_days": {
+            "type": "integer",
+            "title": "Horizon Days"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "expected_return": {
+            "type": "number",
+            "title": "Expected Return"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "gated": {
+            "type": "boolean",
+            "title": "Gated"
+          },
+          "model_used": {
+            "type": "string",
+            "title": "Model Used"
+          },
+          "gate_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gate Reason"
+          },
+          "warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warning"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "warnings": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "horizon",
+          "horizon_days",
+          "score",
+          "expected_return",
+          "confidence",
+          "gated",
+          "model_used"
+        ],
+        "title": "PredictResponse"
+      },
+      "StockCreate": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Username"
+          },
+          "stockName": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Stockname"
+          },
+          "price": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Price"
+          },
+          "quantity": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Quantity"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType",
+            "description": "buy | sell"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "stockName",
+          "price",
+          "quantity",
+          "type"
+        ],
+        "title": "StockCreate"
+      },
+      "StockUpdate": {
+        "properties": {
+          "price": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TransactionType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "stockName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stockname"
+          }
+        },
+        "type": "object",
+        "title": "StockUpdate"
+      },
+      "TradeCreate": {
+        "properties": {
+          "position_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position Id"
+          },
+          "symbol": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Symbol"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Qty"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType"
+          },
+          "price_snapshot": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Snapshot"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "qty",
+          "type"
+        ],
+        "title": "TradeCreate"
+      },
+      "TradeRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "position_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position Id"
+          },
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          },
+          "price_snapshot": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Price Snapshot"
+          },
+          "qty": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Qty"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType"
+          },
+          "traded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Traded At"
+          },
+          "ltp": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ltp"
+          },
+          "fiftyTwoWeekLow": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiftytwoweeklow"
+          },
+          "fiftyTwoWeekHigh": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiftytwoweekhigh"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "position_id",
+          "symbol",
+          "price_snapshot",
+          "qty",
+          "type",
+          "traded_at",
+          "ltp",
+          "fiftyTwoWeekLow",
+          "fiftyTwoWeekHigh"
+        ],
+        "title": "TradeRead"
+      },
+      "TransactionType": {
+        "type": "string",
+        "enum": [
+          "buy",
+          "sell"
+        ],
+        "title": "TransactionType"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
