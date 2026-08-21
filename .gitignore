@@ -60,3 +60,18 @@ dist-ssr
 *.sw?
 
 chatGpt.txt
+
+# Python
+__pycache__/
+*.py[cod]
+.coverage
+.pytest_cache/
+.venv/
+venv/
+backend_py/.venv/
+backend_py/__pycache__/
+
+# Generated OpenAPI (regen via gen:api)
+frontend/src/api/generated/
+frontend/openapi.json
+backend_py/openapi.json
