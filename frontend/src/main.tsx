@@ -6,7 +6,7 @@ import { Routes } from "./routes";
 import "regenerator-runtime";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import "react-toastify/dist/ReactToastify.min.css";
 import { Provider } from "react-redux";
 import { store } from "./store/app";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
